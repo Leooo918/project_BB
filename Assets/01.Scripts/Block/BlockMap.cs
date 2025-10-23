@@ -7,14 +7,13 @@ public class BlockMap : MonoBehaviour
 {
     [SerializeField] private BlockMapSO _blockMapSO;
     [SerializeField] private BlockFrame _blockFrame;
-    [SerializeField] private Transform _blockParent;
 
     private Vector2Int _selectedPosition;
     private bool _canInsertItem = false;
-    private BlockParent _selectedBlock;
+    private Block _selectedBlock;
     private int _selectedIndex;
 
-    private Block[,] _blockArray;
+    private BlockSlot[,] _blockSlotArray;
     private BlockFrame[,] _blockFrameArray;
     private List<Vector2Int> _selectedFrame = new();
 
@@ -34,7 +33,7 @@ public class BlockMap : MonoBehaviour
     public void Initialize(BlockMapSO blockMap)
     {
         _blockMapSO = blockMap;
-        _blockArray = new Block[_blockMapSO.mapSize.x, _blockMapSO.mapSize.y];
+        _blockSlotArray = new BlockSlot[_blockMapSO.mapSize.x, _blockMapSO.mapSize.y];
         _blockFrameArray = new BlockFrame[_blockMapSO.mapSize.x, _blockMapSO.mapSize.y];
 
         for (int i = 0; i < _blockMapSO.mapSize.y; i++)
@@ -49,8 +48,6 @@ public class BlockMap : MonoBehaviour
                 _blockFrameArray[j, i] = frame;
             }
         }
-
-        _blockParent.SetAsLastSibling();
     }
 
 
@@ -69,18 +66,17 @@ public class BlockMap : MonoBehaviour
                 _blockFrameArray[pos.x, pos.y].SetSelection(false);
 
                 Vector2Int offset = _selectedPosition - _selectedBlock.BlockInfo.blockPositions[_selectedIndex];
-                _blockArray[pos.x, pos.y] = _selectedBlock.GetBlockSlot(pos - offset);
-                
-                //위치 찾아주기
-                _blockArray[pos.x, pos.y].transform.SetParent(_blockParent);
-                _blockArray[pos.x, pos.y].SetPosition(_blockFrameArray[pos.x, pos.y].Position);
+                _blockSlotArray[pos.x, pos.y] = _selectedBlock.GetBlockSlot(pos - offset);
             }
+            //위치 찾아주기
+            Vector2Int originPos = _selectedPosition - _selectedBlock.BlockInfo.blockPositions[_selectedIndex];
+            _selectedBlock.SetPosition(_blockFrameArray[originPos.x, originPos.y].Position);
 
-            List<Vector2Int> destroyBlock = BlockMapController.CheckBreakingBlocks(_blockArray);
+            List<Vector2Int> destroyBlock = BlockMapController.CheckBreakingBlocks(_blockSlotArray);
             foreach (Vector2Int pos in destroyBlock)
             {
-                _blockArray[pos.x, pos.y]?.DestroyBlock();
-                _blockArray[pos.x, pos.y] = null;
+                _blockSlotArray[pos.x, pos.y].DestroyBlock();
+                _blockSlotArray[pos.x, pos.y] = null;
             }
 
             Bus<BlockSetEvent>.Publish(new BlockSetEvent(_selectedBlock));
@@ -102,7 +98,7 @@ public class BlockMap : MonoBehaviour
 
         if (_selectedBlock != null)
         {
-            _canInsertItem = BlockMapController.TryInsertBlock(_blockArray, _selectedBlock.BlockInfo,
+            _canInsertItem = BlockMapController.TryInsertBlock(_blockSlotArray, _selectedBlock.BlockInfo,
                 _selectedIndex, position, out _selectedFrame);
 
             if (_canInsertItem)

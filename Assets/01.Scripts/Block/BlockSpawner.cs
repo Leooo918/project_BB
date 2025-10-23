@@ -4,9 +4,8 @@ using UnityEngine;
 public class BlockSpawner : MonoBehaviour
 {
     private const int MAX_SPAWN_COUNT = 3;
-    private const float BLOCK_SMALL_SIZE = 0.7f;
 
-    [SerializeField] private BlockParent _block;
+    [SerializeField] private Block _block;
     [SerializeField] private Transform _blockParent;
     [SerializeField] private List<RectTransform> _blockSpawnPosition;
     [SerializeField] private List<BlockSO> _blockToSpawn;
@@ -32,9 +31,8 @@ public class BlockSpawner : MonoBehaviour
     {
         for (int i = 0; i < MAX_SPAWN_COUNT; i++)
         {
-            BlockParent block = Instantiate(_block, _blockParent);
+            Block block = Instantiate(_block, _blockParent);
             block.SetIndex(i);
-            block.transform.localScale = Vector3.one * BLOCK_SMALL_SIZE;
             block.SetPosition(_blockSpawnPosition[i].position);
             block.Initialize(_blockToSpawn[Random.Range(0, _blockToSpawn.Count)]);
         }
@@ -55,7 +53,6 @@ public class BlockSpawner : MonoBehaviour
 
     private void OnBlockReturn(BlockReturnEvent evt)
     {
-        evt.block.transform.localScale = Vector3.one * BLOCK_SMALL_SIZE;
         evt.block.SetPosition(_blockSpawnPosition[evt.block.Index].position);
     }
 }

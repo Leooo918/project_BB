@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6133033938816689170}
   - component: {fileID: 7395882402788662187}
   - component: {fileID: 623642158380867535}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: BlockDestroyEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
