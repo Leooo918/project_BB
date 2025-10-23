@@ -2,9 +2,9 @@ using UnityEngine;
 
 public struct BlockReturnEvent : IGameEvent
 {
-    public Block block;
+    public BlockParent block;
 
-    public BlockReturnEvent(Block block)
+    public BlockReturnEvent(BlockParent block)
     {
         this.block = block;
     }

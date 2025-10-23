@@ -14,7 +14,7 @@ public static class BlockMapController
     /// <param name="selectedSlotPosition"></param>
     /// <param name="positions"></param>
     /// <returns>Return can InsertBlock</returns>
-    public static bool TryInsertBlock(BlockSlot[,] slots, BlockSO block, int selectedBlockIndex, Vector2Int selectedSlotPosition, out List<Vector2Int> positions)
+    public static bool TryInsertBlock(Block[,] slots, BlockSO block, int selectedBlockIndex, Vector2Int selectedSlotPosition, out List<Vector2Int> positions)
     {
         positions = block.blockPositions.ToList();
 
@@ -40,7 +40,7 @@ public static class BlockMapController
     /// <param name="selectedBlockIndex"></param>
     /// <param name="selectedSlotPosition"></param>
     /// <returns>Return Block to Destroy</returns>
-    public static List<Vector2Int> CheckBreakingBlocks(BlockSlot[,] slots)
+    public static List<Vector2Int> CheckBreakingBlocks(Block[,] slots)
     {
         List<Vector2Int> destroyPositions = new List<Vector2Int>();
 
@@ -68,12 +68,12 @@ public static class BlockMapController
         return destroyPositions;
     }
 
-    public static bool CheckLineComplete(BlockSlot[,] slots, bool isHorizontal, int index)
+    public static bool CheckLineComplete(Block[,] slots, bool isHorizontal, int index)
     {
         int length = isHorizontal ? slots.GetLength(0) : slots.GetLength(1);
         for (int i = 0; i < length; i++)
         {
-            BlockSlot slot = isHorizontal ? slots[i, index] : slots[index, i];
+            Block slot = isHorizontal ? slots[i, index] : slots[index, i];
             if (slot == null) return false;
         }
         return true;
