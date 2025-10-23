@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 7586868633193728878}
   - component: {fileID: 7488740743524475789}
   - component: {fileID: 6839986135298369582}
-  - component: {fileID: 8844570123348276347}
+  - component: {fileID: 3080376656262197741}
   m_Layer: 5
-  m_Name: BlockSlot
+  m_Name: Block
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8844570123348276347
+--- !u!114 &3080376656262197741
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,7 +85,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3439889380685167333}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b03a36366760fd4aa0927542ed54853, type: 3}
+  m_Script: {fileID: 11500000, guid: d358e43b76b46ac40b66c8122b4c18b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _breakingEffect: {fileID: 2673090671498847295, guid: e4477c1ff10df3d4883efbb9f2d1e61c, type: 3}

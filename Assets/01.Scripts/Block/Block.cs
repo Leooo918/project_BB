@@ -1,102 +1,74 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Block : MonoBehaviour
+public class Block : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
-    [SerializeField] private BlockSO _blockSO;
-    [SerializeField] private Vector2 _blockSize;
+    public event Action<int, Vector2> onDragEvent;
 
-    private Vector2 _offset;
-    private int _blockIndex;
-    private int _selectedIndex;
-    private CanvasGroup _canvasGroup;
-    private Dictionary<Vector2Int, BlockSlot> _blockSlotDict;
+    [SerializeField] private GameObject _breakingEffect;
+    private int _slotIndex;
+    private bool _isBlockMovable = true;
 
-    private RectTransform RectTrm => transform as RectTransform;
-    public BlockSO BlockInfo => _blockSO;
-    public int SelectedIndex => _selectedIndex;
-    public int Index => _blockIndex;
+    private RectTransform rectTrm;
+    private RectTransform canvasRect;
+    public event Action<PointerEventData, int> onMouseDownEvent;
+    public event Action onMouseUpEvent;
 
     private void Awake()
     {
-        _canvasGroup = GetComponent<CanvasGroup>();
-        //Initialize(_blockSO);
+        rectTrm = transform as RectTransform;
+        canvasRect = GetComponentInParent<Canvas>().transform as RectTransform;
     }
 
-    private void OnDestroy()
+
+    public void SetIndex(int index) => _slotIndex = index;
+
+    public void OnDrag(PointerEventData eventData)
     {
-        if (_blockSlotDict != null)
-            _blockSlotDict.Keys.ToList().ForEach(key => _blockSlotDict[key].onDragEvent -= OnDragSlot);
+        if (_isBlockMovable == false) return;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, eventData.position, eventData.pressEventCamera, out Vector2 localMousePosition);
+
+        onDragEvent?.Invoke(_slotIndex, localMousePosition);
     }
 
-    public void Initialize(BlockSO block)
+    public void SetMovable(bool isBlockMovable)
     {
-        _blockSO = block;
-        _blockSlotDict = new Dictionary<Vector2Int, BlockSlot>();
-
-        for (int i = 0; i < _blockSO.blockPositions.Count; i++)
-        {
-            int x = _blockSO.blockPositions[i].x;
-            int y = _blockSO.blockPositions[i].y;
-
-            BlockSlot slot = Instantiate(_blockSO.blockPrefab, transform);
-            slot.transform.SetLocalPositionAndRotation(new Vector3(x * _blockSize.x, y * _blockSize.y, 0f), Quaternion.identity);
-            slot.SetIndex(i);
-            slot.onMouseDownEvent += OnPointerDown;
-            slot.onMouseUpEvent += OnPointerUp;
-            slot.onDragEvent += OnDragSlot;
-
-            _blockSlotDict.Add(_blockSO.blockPositions[i], slot);
-        }
-    }
-
-    public BlockSlot GetBlockSlot(Vector2Int position)
-    {
-        if (_blockSlotDict.TryGetValue(position, out BlockSlot slot))
-            return slot;
-        return null;
-    }
-
-    public void SetPosition(Vector2 position)
-    {
-        RectTrm.position = position;
-    }
-
-    public void SetIndex(int index)
-    {
-        _blockIndex = index;
+        _isBlockMovable = isBlockMovable;
     }
 
     public void DestroyBlock()
     {
-        Debug.Log("끼얏호우!");
-        //나중에는 진짜 그냥 부숴버리는 것으로
-        _blockSlotDict.Keys.ToList().ForEach(key => _blockSlotDict[key].SetMovable(false));
+        //풀링으로 바꾸기
+        Destroy(gameObject);
+        Instantiate(_breakingEffect, transform.position, Quaternion.identity);
     }
 
-    #region Event
+    public void SetPosition(Vector2 position) => rectTrm.position = position;
 
-    private void OnDragSlot(int index, Vector2 mousePosition)
+    #region Events
+
+    public void OnPointerDown(PointerEventData eventData)
     {
-        RectTrm.anchoredPosition = mousePosition - _offset;
+        if (_isBlockMovable == false) return;
+        onMouseDownEvent?.Invoke(eventData, _slotIndex);
     }
 
-    private void OnPointerDown(PointerEventData eventData, int index)
+    public void OnPointerUp(PointerEventData eventData)
     {
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(RectTrm, eventData.position, eventData.pressEventCamera, out _offset);
-
-        _selectedIndex = index;
-        _canvasGroup.blocksRaycasts = false;
-        Bus<BlockSelectEvent>.Publish(new BlockSelectEvent(this, _selectedIndex));
+        if (_isBlockMovable == false) return;
+        onMouseUpEvent?.Invoke();
     }
-      
-    private void OnPointerUp()
+
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        _canvasGroup.blocksRaycasts = true;
-        Bus<BlockReleaseEvent>.Publish(new BlockReleaseEvent());
+        if (_isBlockMovable == false) return;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (_isBlockMovable == false) return;
     }
 
     #endregion
