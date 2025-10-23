@@ -3,9 +3,9 @@ using UnityEngine;
 public struct BlockSelectEvent : IGameEvent
 {
     public int selectedIndex;
-    public Block selectedBlock;
+    public BlockParent selectedBlock;
 
-    public BlockSelectEvent(Block block, int index)
+    public BlockSelectEvent(BlockParent block, int index)
     {
         selectedBlock = block;
         selectedIndex = index;
