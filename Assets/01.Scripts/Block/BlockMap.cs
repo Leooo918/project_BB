@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Text;
+using System.Security.Cryptography;
 using UnityEngine;
-using UnityEngine.UIElements;
+using static UnityEditor.PlayerSettings;
 
 public class BlockMap : MonoBehaviour
 {
@@ -14,27 +14,32 @@ public class BlockMap : MonoBehaviour
     private BlockParent _selectedBlock;
     private int _selectedIndex;
 
-    private Block[,] _blockArray;
+    private BlockMapInfo _mapInfo;
     private BlockFrame[,] _blockFrameArray;
     private List<Vector2Int> _selectedFrame = new();
+
+    public BlockMapInfo MapInfo => _mapInfo;
+
 
     private void Awake()
     {
         if (_blockMapSO != null) Initialize(_blockMapSO);
+        Bus<RemainBlockChangeEvent>.OnEvent += CheckInsertableBlockExsist;
         Bus<BlockSelectEvent>.OnEvent += OnSelectedBlock;
-        Bus<BlockReleaseEvent>.OnEvent += OnSetBlock;
+        Bus<BlockReleaseEvent>.OnEvent += TrySetBlock;
     }
 
     private void OnDestroy()
     {
+        Bus<RemainBlockChangeEvent>.OnEvent += CheckInsertableBlockExsist;
         Bus<BlockSelectEvent>.OnEvent -= OnSelectedBlock;
-        Bus<BlockReleaseEvent>.OnEvent -= OnSetBlock;
+        Bus<BlockReleaseEvent>.OnEvent -= TrySetBlock;
     }
 
     public void Initialize(BlockMapSO blockMap)
     {
         _blockMapSO = blockMap;
-        _blockArray = new Block[_blockMapSO.mapSize.x, _blockMapSO.mapSize.y];
+        _mapInfo.blockMap = new Block[_blockMapSO.mapSize.x, _blockMapSO.mapSize.y];
         _blockFrameArray = new BlockFrame[_blockMapSO.mapSize.x, _blockMapSO.mapSize.y];
 
         for (int i = 0; i < _blockMapSO.mapSize.y; i++)
@@ -54,34 +59,34 @@ public class BlockMap : MonoBehaviour
     }
 
 
+
+    #region Event Handlers
+
+    private void CheckInsertableBlockExsist(RemainBlockChangeEvent evt)
+    {
+        if (BlockMapController.CanInsertBlock(_mapInfo.blockMap, evt.remainBlock) == false)
+        {
+            Bus<GameOverEvent>.Publish(new GameOverEvent());
+        }
+    }
+
     private void OnSelectedBlock(BlockSelectEvent evt)
     {
         _selectedBlock = evt.selectedBlock;
         _selectedIndex = evt.selectedIndex;
     }
 
-    private void OnSetBlock(BlockReleaseEvent evt)
+    private void TrySetBlock(BlockReleaseEvent evt)
     {
         if (_canInsertItem)
         {
             foreach (Vector2Int pos in _selectedFrame)
             {
-                _blockFrameArray[pos.x, pos.y].SetSelection(false);
-
                 Vector2Int offset = _selectedPosition - _selectedBlock.BlockInfo.blockPositions[_selectedIndex];
-                _blockArray[pos.x, pos.y] = _selectedBlock.GetBlockSlot(pos - offset);
-                
-                //위치 찾아주기
-                _blockArray[pos.x, pos.y].transform.SetParent(_blockParent);
-                _blockArray[pos.x, pos.y].SetPosition(_blockFrameArray[pos.x, pos.y].Position);
+                SetBlock(_selectedBlock.GetBlockSlot(pos - offset), pos);
             }
 
-            List<Vector2Int> destroyBlock = BlockMapController.CheckBreakingBlocks(_blockArray);
-            foreach (Vector2Int pos in destroyBlock)
-            {
-                _blockArray[pos.x, pos.y]?.DestroyBlock();
-                _blockArray[pos.x, pos.y] = null;
-            }
+            CheckBlockDestroy();
 
             Bus<BlockSetEvent>.Publish(new BlockSetEvent(_selectedBlock));
         }
@@ -95,6 +100,25 @@ public class BlockMap : MonoBehaviour
         _selectedFrame?.Clear();
     }
 
+    public void SetBlock(Block block, Vector2Int position)
+    {
+        _blockFrameArray[position.x, position.y].SetSelection(false);
+        _mapInfo.blockMap[position.x, position.y] = block;
+        block.transform.SetParent(_blockParent);
+        block.transform.localScale = Vector3.one;
+        block.SetPosition(_blockFrameArray[position.x, position.y].Position);
+    }
+
+    public void CheckBlockDestroy()
+    {
+        List<Vector2Int> destroyBlock = BlockMapController.CheckBreakingBlocks(_mapInfo.blockMap);
+        Bus<AddScoreEvent>.Publish(new AddScoreEvent(destroyBlock.Count));
+        foreach (Vector2Int pos in destroyBlock)
+        {
+            _mapInfo.blockMap[pos.x, pos.y]?.DestroyBlock();
+            _mapInfo.blockMap[pos.x, pos.y] = null;
+        }
+    }
 
     private void OnPointerEnterSlot(Vector2Int position)
     {
@@ -102,7 +126,7 @@ public class BlockMap : MonoBehaviour
 
         if (_selectedBlock != null)
         {
-            _canInsertItem = BlockMapController.TryInsertBlock(_blockArray, _selectedBlock.BlockInfo,
+            _canInsertItem = BlockMapController.TryInsertBlock(_mapInfo.blockMap, _selectedBlock.BlockInfo,
                 _selectedIndex, position, out _selectedFrame);
 
             if (_canInsertItem)
@@ -129,4 +153,6 @@ public class BlockMap : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -28,7 +29,7 @@ public static class BlockMapController
 
             if (slots[positions[i].x, positions[i].y] != null) return false;
         }
-        
+
         return true;
     }
 
@@ -77,5 +78,27 @@ public static class BlockMapController
             if (slot == null) return false;
         }
         return true;
+    }
+
+    public static bool CanInsertBlock(Block[,] blockArray, List<BlockSO> remainBlock)
+    {
+        //remainBlock will not be bigger than 3
+        foreach (BlockSO block in remainBlock)
+        {
+            for (int x = 0; x < blockArray.GetLength(0); x++)
+            {
+                for (int y = 0; y < blockArray.GetLength(1); y++)
+                {
+                    if (blockArray[x, y] != null) continue;
+
+                    if (TryInsertBlock(blockArray, block, 0, new Vector2Int(x, y), out _))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

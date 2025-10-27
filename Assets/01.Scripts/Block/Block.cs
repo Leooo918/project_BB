@@ -10,15 +10,14 @@ public class Block : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, I
     private int _slotIndex;
     private bool _isBlockMovable = true;
 
-    private RectTransform rectTrm;
-    private RectTransform canvasRect;
+    private RectTransform _rectTrm;
+    private RectTransform _canvasRect;
     public event Action<PointerEventData, int> onMouseDownEvent;
     public event Action onMouseUpEvent;
 
     private void Awake()
     {
-        rectTrm = transform as RectTransform;
-        canvasRect = GetComponentInParent<Canvas>().transform as RectTransform;
+        _rectTrm = transform as RectTransform;
     }
 
 
@@ -27,8 +26,9 @@ public class Block : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, I
     public void OnDrag(PointerEventData eventData)
     {
         if (_isBlockMovable == false) return;
+        if(_canvasRect == null) _canvasRect = GetComponentInParent<Canvas>().transform as RectTransform;
 
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, eventData.position, eventData.pressEventCamera, out Vector2 localMousePosition);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvasRect, eventData.position, eventData.pressEventCamera, out Vector2 localMousePosition);
 
         onDragEvent?.Invoke(_slotIndex, localMousePosition);
     }
@@ -45,7 +45,7 @@ public class Block : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, I
         Instantiate(_breakingEffect, transform.position, Quaternion.identity);
     }
 
-    public void SetPosition(Vector2 position) => rectTrm.position = position;
+    public void SetPosition(Vector2 position) => _rectTrm.position = position;
 
     #region Events
 

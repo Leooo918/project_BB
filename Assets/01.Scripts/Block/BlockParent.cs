@@ -13,6 +13,7 @@ public class BlockParent : MonoBehaviour
     private int _selectedIndex;
     private CanvasGroup _canvasGroup;
     private Dictionary<Vector2Int, Block> _blockSlotDict;
+    private float _offsetMultiplier = 1;
 
     private RectTransform RectTrm => transform as RectTransform;
     public BlockSO BlockInfo => _blockSO;
@@ -68,6 +69,8 @@ public class BlockParent : MonoBehaviour
     public void SetPosition(Vector2 position)
     {
         RectTrm.position = position;
+
+        RectTrm.anchoredPosition -= _blockSO.centerOffset * _blockSize * transform.localScale;
     }
 
     public void SetIndex(int index)
@@ -82,19 +85,33 @@ public class BlockParent : MonoBehaviour
         Destroy(gameObject);
     }
 
+    public void SetBlockMovable(bool movable)
+    {
+        foreach (var block in _blockSlotDict)
+        {
+            block.Value.SetMovable(movable);
+        }
+    }
+
+    public void SetLocalScale(float scale)
+    {
+        transform.localScale = Vector3.one * scale;
+        _offsetMultiplier = 1f / scale;
+    }
+
     #region Event
 
     private void OnDragSlot(int index, Vector2 mousePosition)
     {
-        RectTrm.anchoredPosition = mousePosition - _offset;
+        RectTrm.anchoredPosition = mousePosition - (_offset * _offsetMultiplier);
     }
 
     private void OnPointerDown(PointerEventData eventData, int index)
     {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(RectTrm, eventData.position, eventData.pressEventCamera, out _offset);
 
+        SetLocalScale(1);
         _selectedIndex = index;
-        transform.localScale = Vector3.one;
         _canvasGroup.blocksRaycasts = false;
 
         Bus<BlockSelectEvent>.Publish(new BlockSelectEvent(this, _selectedIndex));
