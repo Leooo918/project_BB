@@ -14,6 +14,8 @@ public class GameOverPopup : MonoBehaviour, IUIElement<ScoreData>
     [SerializeField] private Button _gotoMenuButton;
     [Space]
     [SerializeField] private float _duration;
+
+    private int _currentScene;
     private CanvasGroup _canvasGroup;
     private Tween _openCloseTween;
 
@@ -21,7 +23,10 @@ public class GameOverPopup : MonoBehaviour, IUIElement<ScoreData>
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
-        _retryButton.onClick.AddListener(() => SceneManager.LoadScene(0));  //임시로 일단 
+
+        _currentScene = SceneManager.GetActiveScene().buildIndex;
+        _retryButton.onClick.AddListener(() => SceneManager.LoadScene(_currentScene));
+        _gotoMenuButton.onClick.AddListener(() => SceneManager.LoadScene(0));  
     }
 
     private void OnDestroy()

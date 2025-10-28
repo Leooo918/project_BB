@@ -7,6 +7,13 @@ public class SabotageSO : ScriptableObject
     [field:SerializeField] public string className { get; private set; }
     [field:SerializeReference] public Sabotage sabotage { get; private set; }
 
+    [field: SerializeField] public Sprite icon { get; private set; }
+    [field: SerializeField] public string sabotageName { get; private set; }
+    [field: SerializeField] public string sabotageExplain { get; private set; }
+
+
+
+
     private void OnValidate()
     {
         if(sabotage == null)
@@ -23,7 +30,6 @@ public class SabotageSO : ScriptableObject
         }
         else
         {
-            Debug.Log(sabotage.GetType().ToString());
             if (sabotage.GetType().ToString() != className) 
             {
                 sabotage = null;

@@ -69,7 +69,6 @@ public class BlockParent : MonoBehaviour
     public void SetPosition(Vector2 position)
     {
         RectTrm.position = position;
-
         RectTrm.anchoredPosition -= _blockSO.centerOffset * _blockSize * transform.localScale;
     }
 
@@ -96,6 +95,11 @@ public class BlockParent : MonoBehaviour
     public void SetLocalScale(float scale)
     {
         transform.localScale = Vector3.one * scale;
+        if(scale == 0)
+        {
+            _offsetMultiplier = 0;
+            return;
+        }
         _offsetMultiplier = 1f / scale;
     }
 

@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameDataController : MonoBehaviour
 {
@@ -10,18 +11,19 @@ public class GameDataController : MonoBehaviour
     private SabotageController _sabotageController;
     private int score = 0;
 
-    private readonly string _path = Path.Combine(Application.dataPath, "maxscore.txt");
+    private string _path;
 
     public int MaxScore { get; private set; } = 0;
 
     protected void Awake()
     {
+        _path = Path.Combine(Application.dataPath, $"{SceneManager.GetActiveScene().name}maxscore.txt");
         LoadMaxScore();
         Bus<AddScoreEvent>.OnEvent += AddScore;
         Bus<GameOverEvent>.OnEvent += SetGameOverPopup;
 
         _sabotageController = GetComponent<SabotageController>();
-        _sabotageController.StartSabotage(_blockMap);
+        _sabotageController?.StartSabotage(_blockMap);
     }
 
     private void OnDestroy()

@@ -38,7 +38,7 @@ public class Block : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, I
         _isBlockMovable = isBlockMovable;
     }
 
-    public void DestroyBlock()
+    public virtual void DestroyBlock()
     {
         //풀링으로 바꾸기
         Destroy(gameObject);

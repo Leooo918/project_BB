@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c3eeb8815eb974a92bfc0002ede911, type: 3}
+  m_Name: SealBackpackSabotage
+  m_EditorClassIdentifier: 
+  <className>k__BackingField: BackpackSealSabotage
+  <sabotage>k__BackingField:
+    rid: 4199951420943499332
+  <icon>k__BackingField: {fileID: 21300000, guid: 131e5b948899e7e46b43d3eaa176c810, type: 3}
+  <sabotageName>k__BackingField: "\uBC30\uB0AD \uAC00\uB9AC\uAE30"
+  <sabotageExplain>k__BackingField: "3\uD134\uAC04 \uBC30\uB0AD\uC744 \uD655\uC778\uD560
+    \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
+  references:
+    version: 2
+    RefIds:
+    - rid: 4199951420943499332
+      type: {class: BackpackSealSabotage, ns: , asm: Assembly-CSharp}
+      data:
+        _sealTurn: 3

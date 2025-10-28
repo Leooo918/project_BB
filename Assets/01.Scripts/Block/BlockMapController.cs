@@ -13,22 +13,31 @@ public static class BlockMapController
     /// <param name="block"></param>
     /// <param name="selectedBlockIndex"></param>
     /// <param name="selectedSlotPosition"></param>
-    /// <param name="positions"></param>
+    /// <param name="selectedPositions"></param>
     /// <returns>Return can InsertBlock</returns>
-    public static bool TryInsertBlock(Block[,] slots, BlockSO block, int selectedBlockIndex, Vector2Int selectedSlotPosition, out List<Vector2Int> positions)
+    public static bool TryInsertBlock(Block[,] slots, BlockSO block, int selectedBlockIndex, Vector2Int selectedSlotPosition, out List<Vector2Int> selectedPositions, out List<Vector2Int> destroyBlocks)
     {
-        positions = block.blockPositions.ToList();
+        destroyBlocks = new List<Vector2Int>();
+        selectedPositions = block.blockPositions.ToList();
 
-        for (int i = 0; i < positions.Count; i++)
+        for (int i = 0; i < selectedPositions.Count; i++)
         {
             Vector2Int offset = block.blockPositions[selectedBlockIndex];
-            positions[i] += selectedSlotPosition - offset;
+            selectedPositions[i] += selectedSlotPosition - offset;
 
-            if (positions[i].x < 0 || positions[i].y < 0 ||
-                positions[i].x >= slots.GetLength(0) || positions[i].y >= slots.GetLength(1)) return false;
+            if (selectedPositions[i].x < 0 || selectedPositions[i].y < 0 ||
+                selectedPositions[i].x >= slots.GetLength(0) || selectedPositions[i].y >= slots.GetLength(1)) return false;
 
-            if (slots[positions[i].x, positions[i].y] != null) return false;
+            if (slots[selectedPositions[i].x, selectedPositions[i].y] != null) return false;
         }
+
+        foreach (Vector2Int position in selectedPositions)
+            slots[position.x, position.y] = block.blockPrefab;
+
+        destroyBlocks = CheckBreakingBlocks(slots);
+
+        foreach (Vector2Int position in selectedPositions)
+            slots[position.x, position.y] = null;
 
         return true;
     }
@@ -91,7 +100,7 @@ public static class BlockMapController
                 {
                     if (blockArray[x, y] != null) continue;
 
-                    if (TryInsertBlock(blockArray, block, 0, new Vector2Int(x, y), out _))
+                    if (TryInsertBlock(blockArray, block, 0, new Vector2Int(x, y), out _, out _))
                     {
                         return true;
                     }

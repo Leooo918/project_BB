@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BlockSpawner : MonoBehaviour
 {
@@ -8,22 +10,34 @@ public class BlockSpawner : MonoBehaviour
 
     [SerializeField] private BlockParent _block;
     [SerializeField] private Transform _blockParent;
-    [SerializeField] private List<RectTransform> _blockSpawnPosition;
     [SerializeField] private BlockSetSO _blockToSpawn;
 
     [SerializeField] private BlockBackpack _blockBackpack;
+    [SerializeField] private RectTransform _originPos;
 
     //private Block[] _remainBlockArray = new Block[MAX_SPAWN_COUNT];
     private int _remainBlockCount = 0;
+    private List<Vector2> _blockSpawnPositions;
     private BlockParent[] _remainBlock;
     private BlockParent[] _backpack = new BlockParent[MAX_SPAWN_COUNT];
+    private RectTransform RectTrm => transform as RectTransform;
 
 
     private void Awake()
     {
-        Initialize();
         Bus<BlockSetEvent>.OnEvent += OnBlockSet;
         Bus<BlockReturnEvent>.OnEvent += OnBlockReturn;
+
+        float space = (RectTrm.rect.width - (_originPos.anchoredPosition.x * 2)) / (MAX_SPAWN_COUNT - 1);
+
+        _blockSpawnPositions = new List<Vector2>();
+        _blockSpawnPositions.Add(_originPos.position);
+        for (int i = 1; i < MAX_SPAWN_COUNT; i++)
+        {
+            _originPos.anchoredPosition += new Vector2(space, 0);
+            _blockSpawnPositions.Add(_originPos.position);
+        }
+        Initialize();
     }
 
     private void OnDestroy()
@@ -41,8 +55,7 @@ public class BlockSpawner : MonoBehaviour
             block.Initialize(_blockToSpawn.GetRandomBlock());
             block.SetBlockMovable(true);
             block.SetLocalScale(BLOCK_SMALL_SIZE);
-
-            block.SetPosition(_blockSpawnPosition[i].position);     //After Initialize
+            block.SetPosition(_blockSpawnPositions[i]);     //After Initialize
             _remainBlock[i] = block;
         }
         _remainBlockCount = MAX_SPAWN_COUNT;
@@ -56,6 +69,7 @@ public class BlockSpawner : MonoBehaviour
             _backpack[i] = block;
         }
         _blockBackpack.SetBackpack(_backpack);
+        _blockBackpack.Reveal();
     }
 
     public void Spawn()
@@ -64,7 +78,7 @@ public class BlockSpawner : MonoBehaviour
         {
             BlockParent block = _backpack[i];
             block.SetLocalScale(BLOCK_SMALL_SIZE);
-            block.SetPosition(_blockSpawnPosition[i].position);
+            block.SetPosition(_blockSpawnPositions[i]);
             block.SetBlockMovable(true);
             block.SetIndex(i);
 
@@ -97,9 +111,11 @@ public class BlockSpawner : MonoBehaviour
             block.SetBlockMovable(true);
             block.SetLocalScale(BLOCK_SMALL_SIZE);
 
-            block.SetPosition(_blockSpawnPosition[i].position);     //After Initialize
+            block.SetPosition(_blockSpawnPositions[i]);     //After Initialize
             _remainBlock[i] = block;
         }
+
+        Bus<RemainBlockChangeEvent>.Publish(new RemainBlockChangeEvent(_remainBlock));
     }
 
     #region Event Handler
@@ -108,7 +124,7 @@ public class BlockSpawner : MonoBehaviour
     {
         _remainBlockCount--;
 
-        for(int i = 0; i < _remainBlock.Length; i++)
+        for (int i = 0; i < _remainBlock.Length; i++)
         {
             if (_remainBlock[i] == evt.block)
             {
@@ -118,14 +134,14 @@ public class BlockSpawner : MonoBehaviour
         }
 
         if (_remainBlockCount == 0) Spawn();
-        Bus<RemainBlockChangeEvent>.Publish(new  RemainBlockChangeEvent(_remainBlock));
+        Bus<RemainBlockChangeEvent>.Publish(new RemainBlockChangeEvent(_remainBlock));
         evt.block.DestroyBlock();
     }
 
     private void OnBlockReturn(BlockReturnEvent evt)
     {
         evt.block.transform.localScale = Vector3.one * BLOCK_SMALL_SIZE;
-        evt.block.SetPosition(_blockSpawnPosition[evt.block.Index].position);
+        evt.block.SetPosition(_blockSpawnPositions[evt.block.Index]);
     }
 
     #endregion

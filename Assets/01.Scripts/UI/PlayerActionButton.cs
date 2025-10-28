@@ -14,9 +14,8 @@ public class PlayerActionButton : MonoBehaviour, IPointerClickHandler
     {
         if (_remainCount <= 0) return;
 
-        Debug.Log("asdf");
-        onInteract?.Invoke();
         AddCount(-1);
+        onInteract?.Invoke();
     }
 
     public void SetCount(int count)

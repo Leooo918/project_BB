@@ -15,11 +15,15 @@ MonoBehaviour:
   <className>k__BackingField: BlockSetSabotage
   <sabotage>k__BackingField:
     rid: 4199951372729974852
+  <icon>k__BackingField: {fileID: 21300000, guid: 336514da269d04b42b2a449bb500ce58, type: 3}
+  <sabotageName>k__BackingField: "\uC7AC\uD65C\uC6A9 \uBE14\uB7ED"
+  <sabotageExplain>k__BackingField: "\uB79C\uB364\uD55C \uC704\uCE58\uC5D0 \uC7AC\uD65C\uC6A9
+    \uBE14\uB7ED\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4.\\n( \uD30C\uAD34 \uC2DC \uC0C8\uB85C\uACE0\uCE68
+    +1 )"
   references:
     version: 2
     RefIds:
     - rid: 4199951372729974852
       type: {class: BlockSetSabotage, ns: , asm: Assembly-CSharp}
       data:
-        spawnBlockCount: 1
-        _blockPrefab: {fileID: 7165238235171669847, guid: 92434ce2afa94914f83dc244c4284dc7, type: 3}
+        _blockPrefab: {fileID: 2590490576470623084, guid: 28c0a66b5ee06ed4f813b35aa28388dc, type: 3}
