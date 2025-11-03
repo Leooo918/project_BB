@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class RerollBlock : ItemBlock
 {
     protected override void GiveItem()

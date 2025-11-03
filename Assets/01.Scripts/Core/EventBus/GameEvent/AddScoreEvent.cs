@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public struct AddScoreEvent : IGameEvent
 {
     public int scoreToAdd;

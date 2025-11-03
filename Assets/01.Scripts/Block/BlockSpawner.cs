@@ -1,7 +1,6 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BlockSpawner : MonoBehaviour
 {
@@ -27,6 +26,7 @@ public class BlockSpawner : MonoBehaviour
     {
         Bus<BlockSetEvent>.OnEvent += OnBlockSet;
         Bus<BlockReturnEvent>.OnEvent += OnBlockReturn;
+        Bus<BlockSelectEvent>.OnEvent += OnSelectBlock;
 
         float space = (RectTrm.rect.width - (_originPos.anchoredPosition.x * 2)) / (MAX_SPAWN_COUNT - 1);
 
@@ -40,10 +40,12 @@ public class BlockSpawner : MonoBehaviour
         Initialize();
     }
 
+
     private void OnDestroy()
     {
         Bus<BlockSetEvent>.OnEvent -= OnBlockSet;
         Bus<BlockReturnEvent>.OnEvent -= OnBlockReturn;
+        Bus<BlockSelectEvent>.OnEvent -= OnSelectBlock;
     }
     private void Initialize()
     {
@@ -122,6 +124,14 @@ public class BlockSpawner : MonoBehaviour
 
     private void OnBlockSet(BlockSetEvent evt)
     {
+        for (int i = 0; i < _remainBlock.Length; i++)
+        {
+            if (_remainBlock[i] != null)
+            {
+                _remainBlock[i].SetBlockMovable(true);
+            }
+        }
+
         _remainBlockCount--;
 
         for (int i = 0; i < _remainBlock.Length; i++)
@@ -140,8 +150,27 @@ public class BlockSpawner : MonoBehaviour
 
     private void OnBlockReturn(BlockReturnEvent evt)
     {
+        for(int i = 0; i < _remainBlock.Length; i++)
+        {
+            if(_remainBlock[i] != null)
+            {
+                _remainBlock[i].SetBlockMovable(true);
+            }
+        }
+
         evt.block.transform.localScale = Vector3.one * BLOCK_SMALL_SIZE;
         evt.block.SetPosition(_blockSpawnPositions[evt.block.Index]);
+    }
+
+    private void OnSelectBlock(BlockSelectEvent evt)
+    {
+        for (int i = 0; i < _remainBlock.Length; i++)
+        {
+            if (_remainBlock[i] != null && _remainBlock[i] != evt.selectedBlock)
+            {
+                _remainBlock[i].SetBlockMovable(false);
+            }
+        }
     }
 
     #endregion

@@ -17,7 +17,7 @@ public class GameDataController : MonoBehaviour
 
     protected void Awake()
     {
-        _path = Path.Combine(Application.dataPath, $"{SceneManager.GetActiveScene().name}maxscore.txt");
+        _path = Path.Combine(Application.persistentDataPath, $"{SceneManager.GetActiveScene().name}maxscore.txt");
         LoadMaxScore();
         Bus<AddScoreEvent>.OnEvent += AddScore;
         Bus<GameOverEvent>.OnEvent += SetGameOverPopup;

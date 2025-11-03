@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public static class BlockMapController
@@ -15,9 +13,9 @@ public static class BlockMapController
     /// <param name="selectedSlotPosition"></param>
     /// <param name="selectedPositions"></param>
     /// <returns>Return can InsertBlock</returns>
-    public static bool TryInsertBlock(Block[,] slots, BlockSO block, int selectedBlockIndex, Vector2Int selectedSlotPosition, out List<Vector2Int> selectedPositions, out List<Vector2Int> destroyBlocks)
+    public static bool TryInsertBlock(Block[,] slots, BlockSO block, int selectedBlockIndex, Vector2Int selectedSlotPosition, out List<Vector2Int> selectedPositions/*, out List<Vector2Int> destroyBlocks*/)
     {
-        destroyBlocks = new List<Vector2Int>();
+        //destroyBlocks = new List<Vector2Int>();
         selectedPositions = block.blockPositions.ToList();
 
         for (int i = 0; i < selectedPositions.Count; i++)
@@ -32,12 +30,16 @@ public static class BlockMapController
         }
 
         foreach (Vector2Int position in selectedPositions)
+        {
             slots[position.x, position.y] = block.blockPrefab;
+        }
 
-        destroyBlocks = CheckBreakingBlocks(slots);
+        //destroyBlocks = CheckBreakingBlocks(slots);
 
         foreach (Vector2Int position in selectedPositions)
+        {
             slots[position.x, position.y] = null;
+        }
 
         return true;
     }
@@ -100,7 +102,7 @@ public static class BlockMapController
                 {
                     if (blockArray[x, y] != null) continue;
 
-                    if (TryInsertBlock(blockArray, block, 0, new Vector2Int(x, y), out _, out _))
+                    if (TryInsertBlock(blockArray, block, 0, new Vector2Int(x, y), out _))
                     {
                         return true;
                     }

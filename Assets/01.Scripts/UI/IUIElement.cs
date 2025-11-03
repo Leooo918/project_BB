@@ -1,3 +1,10 @@
+public interface IUIElement
+{
+    public void EnableFor();
+    public void Disable();
+}
+
+
 public interface IUIElement<T>
 {
     public void EnableFor(T data);

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class BlockMap : MonoBehaviour
@@ -13,13 +14,14 @@ public class BlockMap : MonoBehaviour
     private bool _canInsertItem = false;
     private BlockParent _selectedBlock;
     private int _selectedIndex;
-
+    
     private BlockMapInfo _mapInfo;
     private BlockFrame[,] _blockFrameArray;
     private List<Vector2Int> _selectedFrame = new();
     private List<Vector2Int> _readyBreakingBlock = new();
-    public BlockMapInfo MapInfo => _mapInfo;
 
+    public BlockMapInfo MapInfo => _mapInfo;
+        
 
     private void Awake()
     {
@@ -31,7 +33,7 @@ public class BlockMap : MonoBehaviour
 
     private void OnDestroy()
     {
-        Bus<RemainBlockChangeEvent>.OnEvent += CheckInsertableBlockExsist;
+        Bus<RemainBlockChangeEvent>.OnEvent -= CheckInsertableBlockExsist;
         Bus<BlockSelectEvent>.OnEvent -= OnSelectedBlock;
         Bus<BlockReleaseEvent>.OnEvent -= TrySetBlock;
     }
@@ -66,7 +68,7 @@ public class BlockMap : MonoBehaviour
     {
         if (PlayerActionController.Instance.CanTakeAction() == false)
         {
-            if (BlockMapController.CanInsertBlock(_mapInfo.blockMap, evt.remainBlock) == false)
+            if (BlockMapController.CanInsertBlock(_mapInfo.blockMap, evt.remainBlock) == false) //Something went wrong when build
             {
                 Bus<GameOverEvent>.Publish(new GameOverEvent());
             }
@@ -89,22 +91,8 @@ public class BlockMap : MonoBehaviour
                 SetBlock(_selectedBlock.GetBlockSlot(pos - offset), pos);
             }
             CheckBlockDestroy();
+            CheckPerfect();
 
-            bool isPerfect = true;
-            for (int i = 0; i < _mapInfo.blockMap.GetLength(0); i++)
-            {
-                for (int j = 0; j < _mapInfo.blockMap.GetLength(1); j++)
-                {
-                    if (_mapInfo.blockMap[i, j] != null)
-                    {
-                        isPerfect = false;
-                        break;
-                    }
-                }
-                if (isPerfect == false) break;
-            }
-
-            if (isPerfect) _perfectText.Perfect();
             Bus<BlockSetEvent>.Publish(new BlockSetEvent(_selectedBlock));
         }
         else
@@ -126,6 +114,25 @@ public class BlockMap : MonoBehaviour
         block.SetPosition(_blockFrameArray[position.x, position.y].Position);
     }
 
+    private void CheckPerfect()
+    {
+        bool isPerfect = true;
+        for (int i = 0; i < _mapInfo.blockMap.GetLength(0); i++)
+        {
+            for (int j = 0; j < _mapInfo.blockMap.GetLength(1); j++)
+            {
+                if (_mapInfo.blockMap[i, j] != null)
+                {
+                    isPerfect = false;
+                    break;
+                }
+            }
+            if (isPerfect == false) break;
+        }
+
+        if (isPerfect) _perfectText.Perfect();
+    }
+
     public void CheckBlockDestroy()
     {
         _readyBreakingBlock = BlockMapController.CheckBreakingBlocks(_mapInfo.blockMap);
@@ -145,7 +152,7 @@ public class BlockMap : MonoBehaviour
         if (_selectedBlock != null)
         {
             _canInsertItem = BlockMapController.TryInsertBlock(_mapInfo.blockMap, _selectedBlock.BlockInfo,
-                _selectedIndex, position, out _selectedFrame, out _readyBreakingBlock);
+                _selectedIndex, position, out _selectedFrame);
 
             if (_canInsertItem)
             {
