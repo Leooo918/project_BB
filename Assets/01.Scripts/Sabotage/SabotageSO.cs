@@ -11,7 +11,7 @@ public class SabotageSO : ScriptableObject
     [field: SerializeField] public string sabotageName { get; private set; }
     [field: SerializeField] public string sabotageExplain { get; private set; }
 
-
+    private string sabotageNameCache;
 
 
     private void OnValidate()
@@ -22,6 +22,7 @@ public class SabotageSO : ScriptableObject
             {
                 Type t = Type.GetType(className);
                 sabotage = Activator.CreateInstance(t) as Sabotage;
+                sabotageNameCache = sabotage.GetType().ToString();
             }
             catch
             {
@@ -30,7 +31,7 @@ public class SabotageSO : ScriptableObject
         }
         else
         {
-            if (sabotage.GetType().ToString() != className) 
+            if (sabotageNameCache != className) 
             {
                 sabotage = null;
             }
